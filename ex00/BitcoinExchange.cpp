@@ -28,19 +28,18 @@ void getData(std::map<std::string,double> &map)
 }
 void parseDate(std::string &date)
 {
+    if(date.find("Error"))
+        throw std::runtime_error(date);
     if (date.size() != 10)
-        throw std::runtime_error("Error: Invalide date 1");
+        throw std::runtime_error("Error: Invalide date");
     if (date[4] != '-' || date[7] != '-')
-        throw std::runtime_error("Error: Invalide date 2");
+        throw std::runtime_error("Error: Invalide date");
     for(size_t i = 0; i < date.length();i++)
     {
         if(i == 4 || i == 7)
             continue;
         if(!std::isdigit(date[i]))
-        {
-            std::cout << date[i] << std::endl;
             throw std::runtime_error("Error: Invalide date");
-        }
     }
     int year = std::atoi(date.substr(0,4).c_str());
     int month = std::atoi(date.substr(5,2).c_str());
@@ -67,7 +66,7 @@ void parseInput(std::string line,double &value,std::string &date)
         size_t pos = line.find(" | ");
         if(pos == std::string::npos)
         {
-            date = line ;
+            date = "Error: bad input => " + line ;
             value = std::strtod(line.c_str(), NULL);
             return;
         }
@@ -103,6 +102,7 @@ void processResults(std::map<std::string,double> &db,std::multimap<std::string,d
     {
         std::string date = it->first;
         double value = it->second;
+        std::cout << date << " => " <<value << std::endl;
         try
         {
             parseDate(date);
@@ -122,7 +122,7 @@ void processResults(std::map<std::string,double> &db,std::multimap<std::string,d
         }
         if (found->first != date)
             --found;
-        std::cout << date << " => " << value << " = " << value * found->second << std::endl;
         it++;
+        std::cout << date << " => " << value << " = " << value * found->second << std::endl;
     }
 }
