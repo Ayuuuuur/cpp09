@@ -13,6 +13,7 @@ int main(int ac,char **av)
         }
         getData(map);
         getInput(input,av[1]);
+        processResults(map,input);
     }
     catch(const std::exception& e)
     {

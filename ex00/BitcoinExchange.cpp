@@ -50,14 +50,14 @@ void parseDate(std::string &date)
         throw std::runtime_error("Error: invalide year");
     if(month > 12 || month < 1)
         throw std::runtime_error("Error: invalide month");
-    if(day > 31 || month < 1)
+    if(day > 31 || day < 1)
         throw std::runtime_error("Error: invalide day");
 
 }
 
 void parseValue(double &value)
 {
-    if(value < 1)
+    if(value < 0)
         throw std::runtime_error("Error: not a positive number.");
     if(value > 1000)
         throw std::runtime_error("Error:  too large a number.");
@@ -74,7 +74,7 @@ int parseInput(std::string line,double &value,std::string &date)
         value = std::strtod(valueStr.c_str(), NULL);
         parseDate(date);
         parseValue(value);
-        std::cout << line << std::endl;
+        // std::cout << line << std::endl;
     }
     catch(const std::exception& e)
     {
@@ -100,5 +100,27 @@ void getInput(std::map<std::string,double> &input,char *av)
         if(parseInput(line,value,date) == 1)
             continue;
         input[date] = value;
+    }
+}
+
+
+void processResults(std::map<std::string,double> &db,std::map<std::string,double> &input)
+{
+    std::map<std::string,double>::iterator it = input.begin();
+    while (it != input.end())
+    {
+        std::string date = it->first;
+        double value = it->second;
+        
+        std::map<std::string,double>::iterator found = db.lower_bound(date);
+        if (found == db.begin() && found->first != date)
+        {
+            it++;
+            continue;
+        }
+        if (found->first != date)
+            --found;
+        std::cout << date << " => " << value << " = " << value * found->second << std::endl;
+        it++;
     }
 }

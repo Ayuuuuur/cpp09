@@ -22,6 +22,7 @@ class OpenError : public std::exception
 
 void getData(std::map<std::string,double> &map);
 void getInput(std::map<std::string,double> &input,char *av);
-
+// void loop_map(std::map<std::string,double> &input,std::map<std::string,double> &map);
+void processResults(std::map<std::string,double> &db,std::map<std::string,double> &input);
 
 #endif
