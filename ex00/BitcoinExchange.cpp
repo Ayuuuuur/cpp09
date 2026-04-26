@@ -62,29 +62,23 @@ void parseValue(double &value)
     if(value > 1000)
         throw std::runtime_error("Error:  too large a number.");
 }
-int parseInput(std::string line,double &value,std::string &date)
+void parseInput(std::string line,double &value,std::string &date)
 {
-    try
-    {
-        size_t pos = line.find(" | ");  
+        size_t pos = line.find(" | ");
         if(pos == std::string::npos)
-            throw std::runtime_error("Error: bad input => " + line);
+        {
+            date = line ;
+            value = std::strtod(line.c_str(), NULL);
+            return;
+        }
         date = line.substr(0, pos);
         std::string valueStr = line.substr(pos + 3);
         value = std::strtod(valueStr.c_str(), NULL);
-        parseDate(date);
-        parseValue(value);
-        // std::cout << line << std::endl;
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-        return 1;
-    }
-    return 0;
+
+    
 }
 
-void getInput(std::map<std::string,double> &input,char *av)
+void getInput(std::multimap<std::string,double> &input,char *av)
 {
     std::string date;
     std::string line;
@@ -96,22 +90,30 @@ void getInput(std::map<std::string,double> &input,char *av)
     std::getline(file, line); 
     while(getline(file,line))
     {
-        
-        if(parseInput(line,value,date) == 1)
-            continue;
-        input[date] = value;
+        parseInput(line,value,date);
+        input.insert(std::make_pair(date, value));   
     }
 }
 
 
-void processResults(std::map<std::string,double> &db,std::map<std::string,double> &input)
+void processResults(std::map<std::string,double> &db,std::multimap<std::string,double> &input)
 {
     std::map<std::string,double>::iterator it = input.begin();
     while (it != input.end())
     {
         std::string date = it->first;
         double value = it->second;
-        
+        try
+        {
+            parseDate(date);
+            parseValue(value);         
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+            it++;
+            continue;
+        }
         std::map<std::string,double>::iterator found = db.lower_bound(date);
         if (found == db.begin() && found->first != date)
         {

@@ -5,7 +5,7 @@ int main(int ac,char **av)
     try
     {
         std::map<std::string,double> map;
-        std::map<std::string ,double> input;
+        std::multimap<std::string ,double> input;
         if(ac != 2)
         {
             std::cerr <<"Error: could not open file." << std::endl;
