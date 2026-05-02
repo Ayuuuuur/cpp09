@@ -28,8 +28,8 @@ void getData(std::map<std::string,double> &map)
 }
 void parseDate(std::string &date)
 {
-    if(date.find("Error"))
-        throw std::runtime_error(date);
+    // if(date.find("Error"))
+    //     throw std::runtime_error(date);
     if (date.size() != 10)
         throw std::runtime_error("Error: Invalide date");
     if (date[4] != '-' || date[7] != '-')
@@ -66,14 +66,13 @@ void parseInput(std::string line,double &value,std::string &date)
         size_t pos = line.find(" | ");
         if(pos == std::string::npos)
         {
-            date = "Error: bad input => " + line ;
-            value = std::strtod(line.c_str(), NULL);
+            date = line;
+            value = (double)NULL;
             return;
         }
         date = line.substr(0, pos);
         std::string valueStr = line.substr(pos + 3);
         value = std::strtod(valueStr.c_str(), NULL);
-
     
 }
 
