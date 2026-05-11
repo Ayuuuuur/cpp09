@@ -1,127 +1,214 @@
 #include "BitcoinExchange.hpp"
 
-void parseLine(std::string line,double &value,std::string &date)
-{
-    size_t pos = line.find(",");
-    if(pos == std::string::npos)
-        throw std::runtime_error("Error: Invalide line");
-    date = line.substr(0, pos);
-    std::string valueStr = line.substr(pos + 1);
-    value = std::strtod(valueStr.c_str(), NULL);
-}
+/* ================================= Utils ================================= */
 
-void getData(std::map<std::string,double> &map)
+/*
+** isValidNumber — returns true if str is a valid non-negative decimal number.
+** Accepts an optional leading '+', digits, and at most one '.'.
+** Rejects empty string, leading '.', or any non-digit non-dot character.
+*/
+static bool isValidNumber(const std::string &str)
 {
-    std::string date;
-    std::string line;
-    double value;
+    if (str.empty())
+        return false;
 
-    std::ifstream file("data.csv");
-    if(!file.is_open())
-        throw OpenError();
-    std::getline(file, line); 
-    while(getline(file,line))
+    std::string::const_iterator it = str.begin();
+
+    if (*it == '+')
+        ++it;
+
+    // Leading dot is not a valid number ("." or ".5" alone is ambiguous)
+    if (it == str.end() || *it == '.')
+        return false;
+
+    bool hasDot   = false;
+    bool hasDigit = false;
+
+    for (; it != str.end(); ++it)
     {
-        parseLine(line,value,date);
-        map[date] = value;
+        if (std::isdigit(*it))
+            hasDigit = true;
+        else if (*it == '.' && !hasDot)
+            hasDot = true;
+        else
+            return false;
     }
+
+    return hasDigit;
 }
-void parseDate(std::string &date)
+
+/*
+** isLeapYear — returns true for Gregorian leap years.
+** Rule: divisible by 4, EXCEPT century years must be divisible by 400.
+*/
+static bool isLeapYear(int year)
 {
-    // if(date.find("Error"))
-    //     throw std::runtime_error(date);
-    if (date.size() != 10)
-        throw std::runtime_error("Error: Invalide date");
-    if (date[4] != '-' || date[7] != '-')
-        throw std::runtime_error("Error: Invalide date");
-    for(size_t i = 0; i < date.length();i++)
+    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+}
+
+/*
+** daysInMonth — returns the number of days in a given month/year.
+*/
+static int daysInMonth(int year, int month)
+{
+    if (month == 2)
+        return isLeapYear(year) ? 29 : 28;
+    if (month == 4 || month == 6 || month == 9 || month == 11)
+        return 30;
+    return 31;
+}
+
+/* ========================== Line Validation ============================== */
+
+/*
+** checkLine — validates one line from the input file.
+** Expected format: "YYYY-MM-DD | <positive float <= 1000>"
+** Throws the appropriate exception on any violation.
+*/
+static void checkLine(const std::string &line)
+{
+    // Minimum length: 10 (date) + 3 ( | ) + 1 (digit) = 14
+    if (line.size() < 14)
+        throw BadInput();
+
+    // ── Date part ────────────────────────────────────────────────────────
+    const std::string sYear  = line.substr(0, 4);
+    const std::string sMonth = line.substr(5, 2);
+    const std::string sDay   = line.substr(8, 2);
+
+    if (!isValidNumber(sYear) || !isValidNumber(sMonth) || !isValidNumber(sDay))
+        throw BadInput();
+    if (line[4] != '-' || line[7] != '-')
+        throw BadInput();
+
+    const int year  = std::atoi(sYear.c_str());
+    const int month = std::atoi(sMonth.c_str());
+    const int day   = std::atoi(sDay.c_str());
+
+    if (year < 1)
+        throw BadInput();
+    if (month < 1 || month > 12)
+        throw BadInput();
+    if (day < 1 || day > daysInMonth(year, month))
+        throw BadInput();
+
+    // ── Separator ─────────────────────────────────────────────────────────
+    if (line.substr(10, 3) != " | ")
+        throw BadInput();
+
+    // ── Value part ────────────────────────────────────────────────────────
+    const std::string value = line.substr(13);
+
+    if (value.empty())
+        throw BadInput();
+    if (value[0] == '-')
+        throw NegativeValue();
+    if (!isValidNumber(value))
+        throw BadInput();
+    if (std::atof(value.c_str()) > 1000.0)
+        throw LargeNumber();
+}
+
+/* ====================== Database & Lookup ================================ */
+
+/*
+** fillDataBase — reads data.csv and populates baseData.
+** Keys are date strings "YYYY-MM-DD"; std::map sorts them lexicographically,
+** which is identical to chronological order for ISO-8601 dates.
+*/
+void fillDataBase(std::map<std::string, double> &baseData)
+{
+    std::ifstream f("data.csv");
+    if (!f.is_open())
+        throw ErrorOpeningFile();
+
+    std::string line;
+    std::getline(f, line); // skip header
+
+    while (std::getline(f, line))
     {
-        if(i == 4 || i == 7)
+        if (line.empty())
             continue;
-        if(!std::isdigit(date[i]))
-            throw std::runtime_error("Error: Invalide date");
+
+        const std::string date  = line.substr(0, 10);
+        const std::string value = line.size() > 11 ? line.substr(11) : "";
+
+        if (value.empty())
+            continue;
+
+        baseData[date] = std::atof(value.c_str());
     }
-    int year = std::atoi(date.substr(0,4).c_str());
-    int month = std::atoi(date.substr(5,2).c_str());
-    int day = std::atoi(date.substr(8,2).c_str());
 
-    if(year < 2009)
-        throw std::runtime_error("Error: invalide year");
-    if(month > 12 || month < 1)
-        throw std::runtime_error("Error: invalide month");
-    if(day > 31 || day < 1)
-        throw std::runtime_error("Error: invalide day");
-
+    if (baseData.empty())
+        throw std::runtime_error("Error: data.csv contains no valid entries.");
 }
 
-void parseValue(double &value)
+/*
+** findRate — given a date string, finds the exchange rate using the
+** closest earlier-or-equal date in baseData.
+**
+** std::map with string keys works perfectly here because ISO-8601 dates
+** ("YYYY-MM-DD") sort lexicographically == chronologically.
+** lower_bound(key) returns the first entry >= key.
+** If it doesn't point exactly at key, we step back one to get the
+** closest earlier date.
+*/
+static double findRate(const std::map<std::string, double> &baseData,const std::string &date)
 {
-    if(value < 0)
-        throw std::runtime_error("Error: not a positive number.");
-    if(value > 1000)
-        throw std::runtime_error("Error:  too large a number.");
-}
-void parseInput(std::string line,double &value,std::string &date)
-{
-        size_t pos = line.find(" | ");
-        if(pos == std::string::npos)
-        {
-            date = line;
-            value = (double)NULL;
-            return;
-        }
-        date = line.substr(0, pos);
-        std::string valueStr = line.substr(pos + 3);
-        value = std::strtod(valueStr.c_str(), NULL);
-    
+    std::map<std::string, double>::const_iterator it = baseData.lower_bound(date);
+
+    // Exact match
+    if (it != baseData.end() && it->first == date)
+        return it->second;
+
+    // No earlier date exists in the DB
+    if (it == baseData.begin())
+        throw std::runtime_error("date out of range => " + date);
+
+    // Step back to the closest lower date
+    --it;
+    return it->second;
 }
 
-void getInput(std::multimap<std::string,double> &input,char *av)
+/* ========================= Input File Processing ========================= */
+
+/*
+** parseInputFile — reads the user-supplied file line by line,
+** validates each entry, looks up the rate, and prints the result.
+** Per-line errors are caught and printed without stopping execution.
+*/
+void parseInputFile(const std::map<std::string, double> &baseData,const std::string &inputFile)
 {
-    std::string date;
+    std::ifstream f(inputFile.c_str());
+    if (!f.is_open())
+        throw ErrorOpeningFile();
+
     std::string line;
-    double value;
+    std::getline(f, line);
+    if (line != "date | value")
+        throw std::runtime_error("Error: bad file header, expected \"date | value\".");
 
-    std::ifstream file(av);
-    if(!file.is_open())
-        throw OpenError();
-    std::getline(file, line); 
-    while(getline(file,line))
+    while (std::getline(f, line))
     {
-        parseInput(line,value,date);
-        input.insert(std::make_pair(date, value));   
-    }
-}
-
-
-void processResults(std::map<std::string,double> &db,std::multimap<std::string,double> &input)
-{
-    std::map<std::string,double>::iterator it = input.begin();
-    while (it != input.end())
-    {
-        std::string date = it->first;
-        double value = it->second;
-        std::cout << date << " => " <<value << std::endl;
         try
         {
-            parseDate(date);
-            parseValue(value);         
+            checkLine(line);
+
+            const std::string date     = line.substr(0, 10);
+            const double      quantity = std::atof(line.substr(13).c_str());
+            const double      rate     = findRate(baseData, date);
+
+            std::cout << date << " => " << quantity
+                      << " = " << rate * quantity << "\n";
         }
-        catch(const std::exception& e)
+        catch (const BadInput &e)
         {
-            std::cerr << e.what() << '\n';
-            it++;
-            continue;
+            // BadInput appends the raw line so the user sees what was wrong
+            std::cout << "Error: " << e.what() << line << "\n";
         }
-        std::map<std::string,double>::iterator found = db.lower_bound(date);
-        if (found == db.begin() && found->first != date)
+        catch (const std::exception &e)
         {
-            it++;
-            continue;
+            std::cout << "Error: " << e.what() << "\n";
         }
-        if (found->first != date)
-            --found;
-        it++;
-        std::cout << date << " => " << value << " = " << value * found->second << std::endl;
     }
 }

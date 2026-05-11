@@ -1,27 +1,53 @@
 #ifndef BITCOINEXCHANGE_HPP
-# define BITCOINEXCHANGE_HPP
-#include <iostream>
-#include <algorithm>
-#include <map>
-#include <fstream>
-#include <utility>
-#include <exception>
-#include <string.h>
-#include <string>
-#include <ctype.h>
-#include <sstream>
+#define BITCOINEXCHANGE_HPP
 
-class OpenError : public std::exception
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <map>
+#include <cstdlib>
+#include <cctype>
+#include <exception>
+
+
+class ErrorOpeningFile : public std::exception 
 {
     public:
-        const char* what() const throw()
+        const char *what() const throw() 
         {
-            return "Error : Problem in oppening file";
+            return "Error: could not open file."; 
         }
 };
 
-void getData(std::map<std::string,double> &map);
-void getInput(std::multimap<std::string,double> &input,char *av);
-void processResults(std::map<std::string,double> &db,std::multimap<std::string,double> &input);
+class BadInput : public std::exception 
+{
+    public:
+        const char *what() const throw() 
+        {
+            return "bad input => "; 
+        }
+};
+
+class NegativeValue : public std::exception 
+{
+    public:
+        const char *what() const throw() 
+        { 
+            return "not a positive number."; 
+        }
+};
+
+class LargeNumber : public std::exception 
+{
+    public:
+        const char *what() const throw()
+        {
+            return "too large a number.";
+        }
+};
+
+void    fillDataBase(std::map<std::string, double> &baseData);
+void    parseInputFile(const std::map<std::string, double> &baseData,const std::string &inputFile);
 
 #endif
