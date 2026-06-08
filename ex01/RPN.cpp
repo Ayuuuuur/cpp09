@@ -4,8 +4,8 @@
 void splitInput(std::string input, std::stack<int>& stck)
 {
     std::stringstream ss(input);
-
     std::string word;
+
     while(getline(ss, word, ' '))
     {
         if (word == "")
@@ -14,22 +14,22 @@ void splitInput(std::string input, std::stack<int>& stck)
         {
             if (stck.size() < 2)
                 throw std::exception();
-            int v2 = stck.top();
+            int n2 = stck.top();
             stck.pop();
-            int v1 = stck.top();
+            int n1 = stck.top();
             stck.pop();
             if (word == "+")
-                stck.push(v1 + v2);
+                stck.push(n1 + n2);
             if (word == "-")
-                stck.push(v1 - v2);
+                stck.push(n1 - n2);
             if (word == "/")
             {
-                if (v2 == 0)
+                if (n2 == 0)
                     throw std::exception();
-                stck.push(v1 / v2);
+                stck.push(n1 / n2);
             }
             if (word == "*")
-                stck.push(v1 * v2);
+                stck.push(n1 * n2);
         }
         else
         {
