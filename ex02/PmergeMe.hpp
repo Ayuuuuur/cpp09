@@ -1,12 +1,19 @@
-#ifndef RPN_HPP
-#define RPN_HPP
+#ifndef PMERGEME_HPP
+#define PMERGEME_HPP
 
-#include <algorithm>
-#include <stack>
+#include <vector>
+#include <deque>
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <ctime>
+#include <stdexcept>
+#include <algorithm>
 
-void splitInput(std::string input, std::stack<int>& stck);
+// vector version
+void mergeInsertVector(std::vector<int> &vec);
+
+// deque version
+void mergeInsertDeque(std::deque<int> &deq);
 
 #endif
