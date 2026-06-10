@@ -1,0 +1,3 @@
+what is str.find_first_not_of("0123456789") 
+
+why here long val = std::atol(argv[j]); used atol ?

@@ -1,19 +1,40 @@
 #ifndef PMERGEME_HPP
 #define PMERGEME_HPP
 
-#include <vector>
-#include <deque>
 #include <iostream>
 #include <sstream>
-#include <string>
+#include <vector>
+#include <deque>
+#include <utility>
 #include <ctime>
-#include <stdexcept>
+#include <climits>
 #include <algorithm>
 
-// vector version
-void mergeInsertVector(std::vector<int> &vec);
+class PmergeMe {
+	private:
+		std::vector<unsigned int> _input;
+		std::vector<std::pair<unsigned int, unsigned int> > _vecPairs;
+		std::deque<std::pair<unsigned int, unsigned int> > _dqPairs;
+		int _straggler;
+		double _vecTime;
+		double _dqTime;
 
-// deque version
-void mergeInsertDeque(std::deque<int> &deq);
+	public:
+		PmergeMe();
+		PmergeMe(const PmergeMe &src);
+		PmergeMe &operator=(const PmergeMe &rhs);
+		~PmergeMe();
+
+		void loadNumbers(std::vector<unsigned int> nums);
+		void run();
+
+		template <typename Container>
+		void printSeq(Container seq);
+
+		template <typename Container, typename PairContainer>
+		void mergeInsertSort(Container &main, PairContainer pairs, double &elapsed);
+};
+
+void validateInput(std::string token);
 
 #endif
