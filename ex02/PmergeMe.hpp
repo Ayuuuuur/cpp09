@@ -12,12 +12,12 @@
 
 class PmergeMe {
 	private:
-		std::vector<unsigned int> _input;
-		std::vector<std::pair<unsigned int, unsigned int> > _vecPairs;
-		std::deque<std::pair<unsigned int, unsigned int> > _dqPairs;
-		int _straggler;
-		double _vecTime;
-		double _dqTime;
+		std::vector<unsigned int> input;
+		std::vector<std::pair<unsigned int, unsigned int> > vecPairs;
+		std::deque<std::pair<unsigned int, unsigned int> > dqPairs;
+		int straggler;
+		double vecTime;
+		double dqTime;
 
 	public:
 		PmergeMe();
