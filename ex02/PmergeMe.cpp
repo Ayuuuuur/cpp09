@@ -13,8 +13,8 @@ PmergeMe &PmergeMe::operator=(const PmergeMe &obj)
 	{
 		straggler = obj.straggler;
 		input     = obj.input;
-		vecPairs  = obj.vecPairs;
-		dqPairs   = obj.dqPairs;
+		Vect  = obj.Vect;
+		Deq   = obj.Deq;
 		vecTime   = obj.vecTime;
 		dqTime    = obj.dqTime;
 	}
@@ -32,8 +32,8 @@ void PmergeMe::loadNumbers(std::vector<unsigned int> nums)
 
 	while (i + 1 < nums.size())
 	{
-		vecPairs.push_back(std::make_pair(nums[i], nums[i + 1]));
-		dqPairs.push_back(std::make_pair(nums[i], nums[i + 1]));
+		Vect.push_back(std::make_pair(nums[i], nums[i + 1]));
+		Deq.push_back(std::make_pair(nums[i], nums[i + 1]));
 		i += 2;
 	}
 
@@ -41,36 +41,30 @@ void PmergeMe::loadNumbers(std::vector<unsigned int> nums)
 		straggler = static_cast<int>(nums.back());
 }
 
-template <typename Container, typename PairContainer>
-void PmergeMe::mergeInsertSort(Container &main, PairContainer pairs, double &elapsed) 
+template <typename SortedCon, typename Cont>
+void PmergeMe::mergeInsertSort(SortedCon &Sorted, Cont Str, double &time) 
 {
-	Container pend;
+	SortedCon pend;
 	clock_t start = clock();
 
-	// Step 1: sort each pair so smaller is first
-	for (size_t k = 0; k < pairs.size(); k++) {
-		if (pairs[k].first > pairs[k].second)
-			std::swap(pairs[k].first, pairs[k].second);
+	for (size_t i = 0; i < Str.size(); i++)
+	{
+		if (Str[i].first > Str[i].second)
+			std::swap(Str[i].first, Str[i].second);
 	}
 
-	// Step 2: build pend (smaller elements) and main (larger elements)
-	for (size_t k = 0; k < pairs.size(); k++)
-		pend.push_back(pairs[k].first);
-	for (size_t k = 0; k < pairs.size(); k++)
-		main.push_back(pairs[k].second);
+	for (size_t i = 0; i < Str.size(); i++)
+	{
+		pend.push_back(Str[i].first);
+		Sorted.push_back(Str[i].second);
+	}
 
-	// Step 3: sort the main chain
-	std::sort(main.begin(), main.end());
-
-	// Step 4: binary-insert pend elements into main
-	for (size_t k = 0; k < pend.size(); k++)
-		main.insert(std::lower_bound(main.begin(), main.end(), pend[k]), pend[k]);
-
-	// Step 5: insert straggler if present
+	std::sort(Sorted.begin(), Sorted.end());
+	for (size_t i = 0; i < pend.size(); i++)
+		Sorted.insert(std::lower_bound(Sorted.begin(), Sorted.end(), pend[i]), pend[i]);
 	if (straggler != -1)
-		main.insert(std::lower_bound(main.begin(), main.end(), straggler), straggler);
-
-	elapsed = static_cast<double>(clock() - start) / CLOCKS_PER_SEC;
+		Sorted.insert(std::lower_bound(Sorted.begin(), Sorted.end(), straggler), straggler);
+	time = static_cast<double>(clock() - start) / CLOCKS_PER_SEC;
 }
 
 template <typename Container>
@@ -83,12 +77,13 @@ void PmergeMe::printSeq(Container seq) {
 	}
 }
 
-void PmergeMe::run() {
+void PmergeMe::run() 
+{
 	std::vector<unsigned int> sortedVec;
 	std::deque<unsigned int>  sortedDq;
 
-	mergeInsertSort(sortedVec, vecPairs, vecTime);
-	mergeInsertSort(sortedDq,  dqPairs,  dqTime);
+	// mergeInsertSort(sortedVec, Vect, vecTime);
+	mergeInsertSort(sortedDq,  Deq,  dqTime);
 
 	std::cout << std::fixed;
 	std::cout << "Before: "; printSeq(input);     std::cout << "\n";
