@@ -10,12 +10,13 @@
 #include <climits>
 #include <algorithm>
 
-class PmergeMe {
+class PmergeMe 
+{
 	private:
 		std::vector<unsigned int> input;
 		std::vector<std::pair<unsigned int, unsigned int> > Vect;
 		std::deque<std::pair<unsigned int, unsigned int> > Deq;
-		int straggler;
+		int odd;
 		double vecTime;
 		double dqTime;
 
@@ -25,14 +26,14 @@ class PmergeMe {
 		PmergeMe &operator=(const PmergeMe &rhs);
 		~PmergeMe();
 
-		void loadNumbers(std::vector<unsigned int> nums);
+		void AddNumbers(std::vector<unsigned int> nums);
 		void run();
 
 		template <typename Container>
-		void printSeq(Container seq);
+		void Print(Container seq);
 
 		template <typename Container, typename PairContainer>
-		void mergeInsertSort(Container &main, PairContainer pairs, double &elapsed);
+		void SortAlgo(Container &main, PairContainer pairs, double &elapsed);
 };
 
 void validateInput(std::string token);

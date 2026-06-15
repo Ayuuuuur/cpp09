@@ -33,7 +33,7 @@ int main(int argc, char **argv)
             throw std::runtime_error("Error: sequence is already sorted");
 
 		PmergeMe sorter;
-		sorter.loadNumbers(numbers);
+		sorter.AddNumbers(numbers);
 		sorter.run();
 	}
 	catch(const std::exception &e) 

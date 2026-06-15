@@ -7,7 +7,6 @@ int main(int ac, char **av)
         std::cout << "Error: could not open file.\n";
         return 1;
     }
-
     try
     {
         std::map<std::string, double> baseData;
@@ -19,6 +18,5 @@ int main(int ac, char **av)
         std::cout << e.what() << "\n";
         return 1;
     }
-
     return 0;
 }

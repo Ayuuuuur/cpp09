@@ -1,6 +1,6 @@
 #include "PmergeMe.hpp"
 
-PmergeMe::PmergeMe() : straggler(-1), vecTime(0), dqTime(0) {}
+PmergeMe::PmergeMe() : odd(-1), vecTime(0), dqTime(0) {}
 
 PmergeMe::PmergeMe(const PmergeMe &obj) 
 {
@@ -11,7 +11,7 @@ PmergeMe &PmergeMe::operator=(const PmergeMe &obj)
 {
 	if (this != &obj) 
 	{
-		straggler = obj.straggler;
+		odd = obj.odd;
 		input     = obj.input;
 		Vect  = obj.Vect;
 		Deq   = obj.Deq;
@@ -21,14 +21,13 @@ PmergeMe &PmergeMe::operator=(const PmergeMe &obj)
 	return *this;
 }
 
-
 PmergeMe::~PmergeMe() {}
 
-void PmergeMe::loadNumbers(std::vector<unsigned int> nums)
+void PmergeMe::AddNumbers(std::vector<unsigned int> nums)
 {
 	size_t i = 0;
 	input = nums;
-	straggler = -1;
+	odd = -1;
 
 	while (i + 1 < nums.size())
 	{
@@ -36,41 +35,40 @@ void PmergeMe::loadNumbers(std::vector<unsigned int> nums)
 		Deq.push_back(std::make_pair(nums[i], nums[i + 1]));
 		i += 2;
 	}
-
 	if (nums.size() % 2 != 0)
-		straggler = static_cast<int>(nums.back());
+		odd = static_cast<int>(nums.back());
 }
 
 template <typename SortedCon, typename Cont>
-void PmergeMe::mergeInsertSort(SortedCon &Sorted, Cont Str, double &time) 
+void PmergeMe::SortAlgo(SortedCon &main, Cont arr, double &time) 
 {
 	SortedCon pend;
 	clock_t start = clock();
 
-	for (size_t i = 0; i < Str.size(); i++)
+	for (size_t i = 0; i < arr.size(); i++)
 	{
-		if (Str[i].first > Str[i].second)
-			std::swap(Str[i].first, Str[i].second);
+		if (arr[i].first > arr[i].second)
+			std::swap(arr[i].first, arr[i].second);
 	}
-
-	for (size_t i = 0; i < Str.size(); i++)
+	for (size_t i = 0; i < arr.size(); i++)
 	{
-		pend.push_back(Str[i].first);
-		Sorted.push_back(Str[i].second);
+		pend.push_back(arr[i].first);
+		main.push_back(arr[i].second);
 	}
-
-	std::sort(Sorted.begin(), Sorted.end());
+	std::sort(main.begin(), main.end());
 	for (size_t i = 0; i < pend.size(); i++)
-		Sorted.insert(std::lower_bound(Sorted.begin(), Sorted.end(), pend[i]), pend[i]);
-	if (straggler != -1)
-		Sorted.insert(std::lower_bound(Sorted.begin(), Sorted.end(), straggler), straggler);
-	time = static_cast<double>(clock() - start) / CLOCKS_PER_SEC;
+		main.insert(std::lower_bound(main.begin(), main.end(), pend[i]), pend[i]);
+	if (odd != -1)
+		main.insert(std::lower_bound(main.begin(), main.end(), odd), odd);
+	time = static_cast<double>(clock() - start) / CLOCKS_PER_SEC * 1000000;
 }
 
 template <typename Container>
-void PmergeMe::printSeq(Container seq) {
+void PmergeMe::Print(Container seq)
+{
 	typename Container::iterator it = seq.begin();
-	while (it != seq.end()) {
+	while (it != seq.end())
+	{
 		std::cout << *it;
 		if (++it != seq.end())
 			std::cout << " ";
@@ -82,17 +80,15 @@ void PmergeMe::run()
 	std::vector<unsigned int> sortedVec;
 	std::deque<unsigned int>  sortedDq;
 
-	// mergeInsertSort(sortedVec, Vect, vecTime);
-	mergeInsertSort(sortedDq,  Deq,  dqTime);
+	SortAlgo(sortedVec, Vect, vecTime);
+	SortAlgo(sortedDq,  Deq,  dqTime);
 
 	std::cout << std::fixed;
-	std::cout << "Before: "; printSeq(input);     std::cout << "\n";
-	std::cout << "After:  "; printSeq(sortedVec);  std::cout << "\n";
+	std::cout << "Before: "; Print(input);     std::cout << "\n";
+	std::cout << "After:  "; Print(sortedVec);  std::cout << "\n";
 
-	std::cout << "Time to process a range of " << sortedVec.size()
-	          << " elements with std::vector : " << vecTime << " s\n";
-	std::cout << "Time to process a range of " << sortedDq.size()
-	          << " elements with std::deque  : " << dqTime  << " s\n";
+	std::cout << "Time to process a range of " << sortedVec.size() << " elements with std::vector : " << vecTime << " us\n";
+	std::cout << "Time to process a range of " << sortedDq.size()<< " elements with std::deque  : " << dqTime  << " us\n";
 }
 
 void validateInput(std::string str) 
