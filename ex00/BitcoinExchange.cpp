@@ -25,6 +25,42 @@ static bool isValidNumber(const std::string& str)
     return hasDigit;
 }
 
+void fillDataBase(std::map<std::string, double> &baseData)
+{
+    std::ifstream f("data.csv");
+    if (!f.is_open())
+        throw ErrorOpeningFile();
+    std::string line;
+    std::getline(f, line);
+
+    while (std::getline(f, line))
+    {
+        if (line.empty())
+            continue;
+        const std::string date  = line.substr(0, 10);
+        std::string value = "";
+        if (line.size() > 11)
+            value = line.substr(11);
+        if (value.empty())
+            continue;
+        baseData[date] = std::atof(value.c_str());
+    }
+    if (baseData.empty())
+        throw std::runtime_error("Error: data.csv contains no valid entries.");
+}
+
+static double findRate(const std::map<std::string, double> &baseData,const std::string &date)
+{
+    std::map<std::string, double>::const_iterator it = baseData.lower_bound(date);
+
+    if (it != baseData.end() && it->first == date)
+        return it->second;
+    if (it == baseData.begin())
+        throw std::runtime_error("date out of range => " + date);
+    --it;
+    return it->second;
+}
+
 static bool isLeapYear(int year)
 {
     return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
@@ -76,42 +112,6 @@ static void checkLine(const std::string &line)
         throw BadInput();
     if (std::atof(value.c_str()) > 1000.0)
         throw LargeNumber();
-}
-
-void fillDataBase(std::map<std::string, double> &baseData)
-{
-    std::ifstream f("data.csv");
-    if (!f.is_open())
-        throw ErrorOpeningFile();
-    std::string line;
-    std::getline(f, line);
-
-    while (std::getline(f, line))
-    {
-        if (line.empty())
-            continue;
-        const std::string date  = line.substr(0, 10);
-        std::string value = "";
-        if (line.size() > 11)
-            value = line.substr(11);
-        if (value.empty())
-            continue;
-        baseData[date] = std::atof(value.c_str());
-    }
-    if (baseData.empty())
-        throw std::runtime_error("Error: data.csv contains no valid entries.");
-}
-
-static double findRate(const std::map<std::string, double> &baseData,const std::string &date)
-{
-    std::map<std::string, double>::const_iterator it = baseData.lower_bound(date);
-
-    if (it != baseData.end() && it->first == date)
-        return it->second;
-    if (it == baseData.begin())
-        throw std::runtime_error("date out of range => " + date);
-    --it;
-    return it->second;
 }
 
 void parseInputFile(const std::map<std::string, double> &baseData,const std::string &inputFile)

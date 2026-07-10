@@ -14,8 +14,10 @@ class PmergeMe
 {
 	private:
 		std::vector<unsigned int> input;
-		std::vector<std::pair<unsigned int, unsigned int> > Vect;
-		std::deque<std::pair<unsigned int, unsigned int> > Deq;
+		// std::vector<std::pair<unsigned intunsigned int> > Vect;
+		std::vector<unsigned int> Vect;
+		std::deque<unsigned int> Deq;
+		// std::deque<std::pair<unsigned int, unsigned int> > Deq;
 		int odd;
 		double vecTime;
 		double dqTime;
@@ -32,8 +34,8 @@ class PmergeMe
 		template <typename Container>
 		void Print(Container seq);
 
-		template <typename Container, typename PairContainer>
-		void SortAlgo(Container &main, PairContainer pairs, double &elapsed);
+		template <typename SortedCon, typename Cont>
+		void SortAlgo(SortedCon &main, Cont arr, double &time);
 };
 
 void validateInput(std::string token);
