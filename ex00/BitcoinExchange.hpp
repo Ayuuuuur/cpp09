@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <cctype>
 #include <exception>
-
+#include <algorithm>
 
 class ErrorOpeningFile : public std::exception 
 {

@@ -1,6 +1,30 @@
 #include "BitcoinExchange.hpp"
 
-static bool isValidNumber(const std::string& str)
+bool validDate(const std::string &date)
+{
+    if (date.size() != 10)
+        return false;
+
+    for (size_t i = 0; i < date.size(); i++)
+    {
+        if (i == 4 || i == 7)
+        {
+            if (date[i] != '-')
+                return false;
+        }
+        else if (!std::isdigit(date[i]))
+            return false;
+    }
+    return true;
+}
+
+std::string removeSpaces(std::string str)
+{
+    str.erase(std::remove(str.begin(), str.end(), ' '), str.end());
+    return str;
+}
+
+bool isValidNumber(const std::string& str)
 {
     if (str.empty())
         return false;
@@ -49,7 +73,7 @@ void fillDataBase(std::map<std::string, double> &baseData)
         throw std::runtime_error("Error: data.csv contains no valid entries.");
 }
 
-static double findRate(const std::map<std::string, double> &baseData,const std::string &date)
+double findRate(const std::map<std::string, double> &baseData,const std::string &date)
 {
     std::map<std::string, double>::const_iterator it = baseData.lower_bound(date);
 
@@ -61,12 +85,12 @@ static double findRate(const std::map<std::string, double> &baseData,const std::
     return it->second;
 }
 
-static bool isLeapYear(int year)
+bool isLeapYear(int year)
 {
     return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
 }
 
-static int daysInMonth(int year, int month)
+int daysInMonth(int year, int month)
 {
     if (month == 2)
         return isLeapYear(year) ? 29 : 28;
@@ -75,19 +99,22 @@ static int daysInMonth(int year, int month)
     return 31;
 }
 
-static void checkLine(const std::string &line)
+void checkLine(const std::string &line)
 {
-    if (line.size() < 14)
+    if (line.size() < 12)
         throw BadInput();
 
-    const std::string sYear  = line.substr(0, 4);
-    const std::string sMonth = line.substr(5, 2);
-    const std::string sDay   = line.substr(8, 2);
+    if (line[10] != '|')
+        throw BadInput();
 
-    if (!isValidNumber(sYear) || !isValidNumber(sMonth) || !isValidNumber(sDay))
+    const std::string date = line.substr(0, 10);
+
+    if (!validDate(date))
         throw BadInput();
-    if (line[4] != '-' || line[7] != '-')
-        throw BadInput();
+
+    const std::string sYear  = date.substr(0, 4);
+    const std::string sMonth = date.substr(5, 2);
+    const std::string sDay   = date.substr(8, 2);
 
     const int year  = std::atoi(sYear.c_str());
     const int month = std::atoi(sMonth.c_str());
@@ -99,10 +126,8 @@ static void checkLine(const std::string &line)
         throw BadInput();
     if (day < 1 || day > daysInMonth(year, month))
         throw BadInput();
-    if (line.substr(10, 3) != " | ")
-        throw BadInput();
 
-    const std::string value = line.substr(13);
+    const std::string value = line.substr(11);
 
     if (value.empty())
         throw BadInput();
@@ -122,16 +147,18 @@ void parseInputFile(const std::map<std::string, double> &baseData,const std::str
 
     std::string line;
     std::getline(f, line);
-    if (line != "date | value")
+    line = removeSpaces(line);
+    if (line != "date|value")
         throw std::runtime_error("Error: bad file header, expected \"date | value\".");
 
     while (std::getline(f, line))
     {
+        line = removeSpaces(line);
         try
         {
             checkLine(line);
             const std::string date     = line.substr(0, 10);
-            const double      quantity = std::atof(line.substr(13).c_str());
+            const double      quantity = std::atof(line.substr(11).c_str());
             const double      rate     = findRate(baseData, date);
 
             std::cout << date << " => " << quantity << " = " << rate * quantity << "\n";

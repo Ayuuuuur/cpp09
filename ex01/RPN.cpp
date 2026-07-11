@@ -33,10 +33,9 @@ void splitInput(std::string input, std::stack<int>& stck)
         }
         else
         {
-            if (isdigit((int)word[0]))
-                stck.push(word[0] - '0');
-            else
+            if (word.size() != 1 || !std::isdigit(word[0]))
                 throw std::exception();
+            stck.push(word[0] - '0');
         }
     }
 }

@@ -31,11 +31,10 @@ class PmergeMe
 		void AddNumbers(std::vector<unsigned int> nums);
 		void run();
 
-		template <typename Container>
-		void Print(Container seq);
+		void Print(const std::vector<unsigned int> &seq);
 
-		template <typename SortedCon, typename Cont>
-		void SortAlgo(SortedCon &main, Cont arr, double &time);
+		void SortVector(std::vector<unsigned int> &sorted);
+		void SortDeque(std::deque<unsigned int> &sorted);
 };
 
 void validateInput(std::string token);

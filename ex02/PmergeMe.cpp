@@ -107,6 +107,7 @@ static void mergeInsertSort(std::vector<unsigned int> &arr)
 	if (!pend.empty())
 		inserted[0] = true;
 	//!inserted pend
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	size_t Last = 0;
 	for (size_t t = 1; t < jac.size(); t++)
 	{
@@ -117,7 +118,7 @@ static void mergeInsertSort(std::vector<unsigned int> &arr)
 		for (size_t k = i; k > Last; k--)
 		{
 			if (k < pend.size() && !inserted[k])
-			{
+			{ 
 				std::vector<unsigned int>::iterator bound = std::lower_bound(main.begin(), main.end(), pend[k]);
 				main.insert(bound, pend[k]);
 				inserted[k] = true;
@@ -127,7 +128,7 @@ static void mergeInsertSort(std::vector<unsigned int> &arr)
 		if (i == pend.size() - 1)
 			break;
 	}
-
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	for (size_t k = 0; k < pend.size(); k++)
 	{
 		if (!inserted[k])
@@ -143,30 +144,41 @@ static void mergeInsertSort(std::vector<unsigned int> &arr)
 	}
 	arr = main;
 }
-
-template <typename SortedCon, typename Cont>
-void PmergeMe::SortAlgo(SortedCon &main, Cont arr, double &time)
+//Vector
+void PmergeMe::SortVector(std::vector<unsigned int> &sorted)
 {
-	clock_t start = clock();
-	std::vector<unsigned int> pend(arr.begin(), arr.end());
+    clock_t start = clock();
 
-	mergeInsertSort(pend);
+    sorted = Vect;
+    mergeInsertSort(sorted);
 
-	for (size_t i = 0; i < pend.size(); i++)
-		main.push_back(pend[i]);
-	time = static_cast<double>(clock() - start) / CLOCKS_PER_SEC * 1000000;
+    vecTime = static_cast<double>(clock() - start)
+        / CLOCKS_PER_SEC * 1000000;
+}
+//Deque
+void PmergeMe::SortDeque(std::deque<unsigned int> &sorted)
+{
+    clock_t start = clock();
+
+    std::vector<unsigned int> tmp(Deq.begin(), Deq.end());
+
+    mergeInsertSort(tmp);
+
+    sorted.assign(tmp.begin(), tmp.end());
+
+    dqTime = static_cast<double>(clock() - start)
+        / CLOCKS_PER_SEC * 1000000;
 }
 
-template <typename Container>
-void PmergeMe::Print(Container seq)
+//Print Vector
+void PmergeMe::Print(const std::vector<unsigned int> &seq)
 {
-	typename Container::iterator it = seq.begin();
-	while (it != seq.end())
-	{
-		std::cout << *it;
-		if (++it != seq.end())
-			std::cout << " ";
-	}
+    for (size_t i = 0; i < seq.size(); i++)
+    {
+        std::cout << seq[i];
+        if (i + 1 < seq.size())
+            std::cout << " ";
+    }
 }
 
 void PmergeMe::run()
@@ -174,8 +186,8 @@ void PmergeMe::run()
 	std::vector<unsigned int> sortedVec;
 	std::deque<unsigned int>  sortedDq;
 
-	SortAlgo(sortedVec, Vect, vecTime);
-	SortAlgo(sortedDq,  Deq,  dqTime);
+	SortVector(sortedVec);
+	SortDeque(sortedDq);
 
 	std::cout << std::fixed;
 	std::cout << "Before: "; Print(input);     std::cout << "\n";
