@@ -3,14 +3,14 @@
 
 void splitInput(std::string input, std::stack<int>& stck)
 {
-    std::stringstream ss(input);
-    std::string word;
+    std::stringstream str(input);
+    std::string buffer;
 
-    while(getline(ss, word, ' '))
+    while(getline(str, buffer, ' '))
     {
-        if (word == "")
+        if (buffer == "")
             continue;
-        if (word == "+" || word == "-" || word == "/" || word == "*")
+        if (buffer == "+" || buffer == "-" || buffer == "/" || buffer == "*")
         {
             if (stck.size() < 2)
                 throw std::exception();
@@ -18,24 +18,24 @@ void splitInput(std::string input, std::stack<int>& stck)
             stck.pop();
             int n1 = stck.top();
             stck.pop();
-            if (word == "+")
+            if (buffer == "+")
                 stck.push(n1 + n2);
-            if (word == "-")
+            if (buffer == "-")
                 stck.push(n1 - n2);
-            if (word == "/")
+            if (buffer == "/")
             {
                 if (n2 == 0)
                     throw std::exception();
                 stck.push(n1 / n2);
             }
-            if (word == "*")
+            if (buffer == "*")
                 stck.push(n1 * n2);
         }
         else
         {
-            if (word.size() != 1 || !std::isdigit(word[0]))
+            if (buffer.size() != 1 || !std::isdigit(buffer[0]))
                 throw std::exception();
-            stck.push(word[0] - '0');
+            stck.push(buffer[0] - '0');
         }
     }
 }
