@@ -103,11 +103,11 @@ static void mergeInsertSort(std::vector<unsigned int> &arr)
 
 	//Jacobsthal numbers [0, 1, 1, 3, 5, 11, 21, 43...]
 	std::vector<size_t> jac = jacobsthal(pend.size());
+	
 	std::vector<bool> inserted(pend.size(), false);
 	if (!pend.empty())
 		inserted[0] = true;
 	//!inserted pend
-	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	size_t Last = 0;
 	for (size_t t = 1; t < jac.size(); t++)
 	{
@@ -128,7 +128,6 @@ static void mergeInsertSort(std::vector<unsigned int> &arr)
 		if (i == pend.size() - 1)
 			break;
 	}
-	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	for (size_t k = 0; k < pend.size(); k++)
 	{
 		if (!inserted[k])
