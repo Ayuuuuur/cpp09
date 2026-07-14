@@ -1,6 +1,6 @@
 #include "PmergeMe.hpp"
 
-PmergeMe::PmergeMe() : odd(-1), vecTime(0), dqTime(0) {}
+PmergeMe::PmergeMe() :  vecTime(0), dqTime(0) {}
 
 PmergeMe::PmergeMe(const PmergeMe &obj)
 {
@@ -11,7 +11,6 @@ PmergeMe &PmergeMe::operator=(const PmergeMe &obj)
 {
 	if (this != &obj)
 	{
-		odd     = obj.odd;
 		input   = obj.input;
 		Vect    = obj.Vect;
 		Deq     = obj.Deq;
@@ -34,7 +33,7 @@ void PmergeMe::AddNumbers(std::vector<unsigned int> nums)
 }
 
 //Jacobsthal numbers [0, 1, 1, 3, 5, 11, 21, 43...]
-static std::vector<size_t> jacobsthal(size_t n)
+std::vector<size_t> jacobsthal(size_t n)
 {
 	std::vector<size_t> jac;
 	jac.push_back(0);
@@ -48,7 +47,7 @@ static std::vector<size_t> jacobsthal(size_t n)
 	return jac;
 }
 
-static void mergeInsertSort(std::vector<unsigned int> &arr)
+void mergeInsertSort(std::vector<unsigned int> &arr)
 {
 	if (arr.size() <= 1)
 		return;
@@ -107,7 +106,8 @@ static void mergeInsertSort(std::vector<unsigned int> &arr)
 	std::vector<bool> inserted(pend.size(), false);
 	if (!pend.empty())
 		inserted[0] = true;
-	//!inserted pend
+
+	//inserted pend
 	size_t Last = 0;
 	for (size_t t = 1; t < jac.size(); t++)
 	{
@@ -143,6 +143,7 @@ static void mergeInsertSort(std::vector<unsigned int> &arr)
 	}
 	arr = main;
 }
+
 //Vector
 void PmergeMe::SortVector(std::vector<unsigned int> &sorted)
 {

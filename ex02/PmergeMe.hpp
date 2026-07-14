@@ -14,11 +14,8 @@ class PmergeMe
 {
 	private:
 		std::vector<unsigned int> input;
-		// std::vector<std::pair<unsigned intunsigned int> > Vect;
 		std::vector<unsigned int> Vect;
 		std::deque<unsigned int> Deq;
-		// std::deque<std::pair<unsigned int, unsigned int> > Deq;
-		int odd;
 		double vecTime;
 		double dqTime;
 
